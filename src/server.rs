@@ -14,18 +14,8 @@ pub struct Server {
 
 impl Server {
     pub async fn new() -> Result<Self> {
-        let db_url = std::env::var("DATABASE_URL").unwrap_or_else(|_| {
-            // Default to ~/.gemini/antigravity/dev_insights.db
-            if let Ok(home) = std::env::var("HOME") {
-                let path = std::path::Path::new(&home)
-                    .join(".gemini")
-                    .join("antigravity")
-                    .join("dev_insights.db");
-                format!("sqlite://{}", path.to_string_lossy())
-            } else {
-                "sqlite://dev_insights.db".to_string()
-            }
-        });
+        let db_url = std::env::var("DATABASE_URL")
+            .unwrap_or_else(|_| "sqlite://dev_insights.db".to_string());
 
         // Ensure the directory exists if using sqlite
         if db_url.starts_with("sqlite://") {
@@ -157,12 +147,23 @@ impl Server {
                     id: None,
                 };
             }
-            _ => JsonRpcResponse::error(
-                req.id,
-                -32601,
-                format!("Method not found: {}", req.method),
-                None,
-            ),
+            _ => {
+                if req.id.is_none() {
+                    // Ignore unknown notifications
+                    return JsonRpcResponse {
+                        jsonrpc: "2.0".to_string(),
+                        result: None,
+                        error: None,
+                        id: None,
+                    };
+                }
+                JsonRpcResponse::error(
+                    req.id,
+                    -32601,
+                    format!("Method not found: {}", req.method),
+                    None,
+                )
+            }
         }
     }
 }

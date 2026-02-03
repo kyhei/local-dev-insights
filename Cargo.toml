@@ -1,0 +1,16 @@
+[package]
+name = "local-dev-insights"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1.28", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
+sysinfo = "0.30"
+dotenv = "0.15"
+walkdir = "2.4"
+anyhow = "1.0"
+crossbeam-channel = "0.5" # Useful for some async patterns if needed, but tokio usually suffices.
+chrono = "0.4"
